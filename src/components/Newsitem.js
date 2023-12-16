@@ -1,18 +1,21 @@
-import React  from "react";
+import React from "react";
+const defaultImage = process.env.REACT_APP_DEFAULT_IMAGE;
 
-  const Newsitem = (props) => {
-
-    let { title, description, imageUrl, newsUrl, author, date , source} = props;
-
-    return (
+const Newsitem = ({
+  title,
+  description,
+  imageUrl,
+  newsUrl,
+  author,
+  date,
+  source,
+}) => {
+  return (
+    <div className="col-md-4 my-3" style={{ height: "100%" }}>
       <div className="container">
         <div className="card h-100">
           <img
-            src={
-              !imageUrl
-                ? "https://images.moneycontrol.com/static-mcnews/2023/08/sensexdown_niftydown-1-770x433.jpg"
-                : imageUrl
-            }
+            src={!imageUrl ? defaultImage : imageUrl}
             className="card-img-top"
             alt="..."
           />
@@ -26,7 +29,7 @@ import React  from "react";
                 : description}
             </p>
             <div className="mb-2">
-            <span className="badge text-bg-danger">{source}</span>
+              <span className="badge text-bg-danger">{source}</span>
             </div>
             <p className="card-text">
               <small className="text-body-secondary">
@@ -45,8 +48,8 @@ import React  from "react";
           </div>
         </div>
       </div>
-    );
-  // }
-}
+    </div>
+  );
+};
 
 export default Newsitem;
