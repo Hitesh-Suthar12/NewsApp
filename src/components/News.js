@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Newsitem from "./Newsitem";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
@@ -6,48 +6,44 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { capitalizeFirstLetter, uppercaseAll } from "../utils";
 import { fetchData } from "../Actions";
 
-const News = ({ category, country }) => {
+const News = ({ category }) => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
 
+  const loadPage = useCallback(
+    async (loadMore) => {
+      if (loading) return;
+      const currentPage = loadMore ? page + 1 : 0;
+      setLoading(true);
+
+      try {
+        const { articles: list, totalResults } = await fetchData({
+          category,
+          page: currentPage,
+        });
+
+        if (list?.length) {
+          setArticles((art) => art.concat(list));
+          setTotalResults(totalResults);
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        console.log("Something went wrong!");
+      } finally {
+        setPage(currentPage);
+        setLoading(false);
+      }
+    },
+    [category, loading, page]
+  );
+
   useEffect(() => {
     document.title = `News - ${capitalizeFirstLetter(category)}`;
-    if (!loading) {
-      loadPage(false);
-    }
-  }, [category, country]);
-
-  const loadPage = async (loadMore) => {
-    if (loading) return;
-    const currentPage = loadMore ? page + 1 : 0;
-    setLoading(true);
-
-    try {
-      const { articles: list, totalResults } = await fetchData({
-        category,
-        country,
-        page: currentPage,
-      });
-
-      if (list?.length) {
-        if (loadMore) {
-          setArticles((art) => art.concat(list));
-        } else {
-          setArticles(list);
-        }
-        setTotalResults(totalResults);
-      } else {
-        throw new Error();
-      }
-    } catch (e) {
-      console.log("Something went wrong!");
-    } finally {
-      setPage(currentPage);
-      setLoading(false);
-    }
-  };
+    loadPage(false);
+  }, [category, loadPage]);
 
   return (
     <div className="container my-3 pt-5 mb-3">
@@ -86,12 +82,10 @@ const News = ({ category, country }) => {
 };
 
 News.defaultProps = {
-  country: "in",
   category: "general",
 };
 
 News.propTypes = {
-  country: PropTypes.string,
   category: PropTypes.string,
 };
 
